@@ -6,14 +6,22 @@ import utility
 
 Keyword Property WRackActivator Auto
 
+FormList Property DSC04PaintingList Auto
+
+Keyword Property DSC04DisableParent Auto
+
+Keyword Property DSC04EnableParent Auto
+
 ;The activator we must disable if there is already something in this trigger
 ObjectReference Property ActivatorRef Auto Hidden
 
-Int Property numInTrig Auto Hidden
-
 Bool Property AlreadyInit Auto Hidden
 
-FormList Property DSC04PaintingList Auto
+ObjectReference Property EnableParentRef Auto Hidden
+
+ObjectReference Property DisableParentRef Auto Hidden
+
+Actor Property PlayerRef Auto
 
 Int InTrigger = 0
 
@@ -23,8 +31,8 @@ EVENT OnReset()
 endEVENT
 
 EVENT OnUpdate()
-    Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
-    if GetTriggerObjectCount() == 0
+    Log("OnUpdate - GetTriggerObjectCount => " + GetTriggerObjectCount())
+    if self.IsEnabled() && GetTriggerObjectCount() == 0
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
             ActivatorRef.Enable()
@@ -36,11 +44,34 @@ EVENT OnUpdate()
         endif
     endif
     ActivatorRef = NONE
-    RegisterForSingleUpdate(2)
+
+    if PlayerRef.IsInLocation(self.GetCurrentLocation())
+        RegisterForSingleUpdate(2)
+    endif
 endEVENT
 
-EVENT OnLoad()
-    Log("running OnLoad() and AlreadyInit = " + AlreadyInit)
+EVENT OnCellAttach()
+    Log("running OnCellAttach() and AlreadyInit = " + AlreadyInit)
+    EnableParentRef = GetLinkedRef(DSC04EnableParent)
+    DisableParentRef = GetLinkedRef(DSC04DisableParent)
+    Log("EnableParentRef => " + EnableParentRef)
+    Log("DisableParentRef => " + DisableParentRef)
+    if EnableParentRef
+        if EnableParentRef.IsEnabled()
+            if DisableParentRef
+                if DisableParentRef.IsDisabled()
+                    self.Enable()
+                else
+                    self.Disable()
+                endif
+            else
+                self.Enable()
+            endif
+        else
+            self.Disable()
+        endif
+    endif
+
     if (AlreadyInit == FALSE) && (self.IsEnabled())
         ActivatorRef = GetLinkedRef(WRackActivator)
         if (ActivatorRef)
@@ -52,6 +83,10 @@ EVENT OnLoad()
     else
         ;Do nothing
     endif
+
+    EnableParentRef = NONE
+    DisableParentRef = NONE
+
     Log("finishing OnLoad() and AlreadyInit = " + AlreadyInit)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
     RegisterForSingleUpdate(2)
@@ -88,5 +123,5 @@ auto STATE WaitingForReference
 endSTATE
 
 Function Log(String msg, String modname="DSC04")
-    Debug.Trace("[" + modname + "] " + self + " " + msg)
+    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction

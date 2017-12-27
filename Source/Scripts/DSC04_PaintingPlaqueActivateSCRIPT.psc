@@ -23,26 +23,26 @@ Message Property DSC04_NoPaintingToPlace Auto;
 
 ;-------------------------------------------
 EVENT OnCellAttach()
-    Trace("running OnCellLoad() and AlreadyInit = " + AlreadyInit)
+    Log("running OnCellLoad() and AlreadyInit = " + AlreadyInit)
     TriggerMarker = GetLinkedRef(WRackTrigger)
-    Trace("The TriggerMarker is " + TriggerMarker)
+    Log("The TriggerMarker is " + TriggerMarker)
     If (TriggerMarker) && (TriggerMarker.IsEnabled()) && (TriggerMarker.GetTriggerObjectCount() == 0)
         Self.Enable()
     endif
     
     if (TriggerMarker) && (AlreadyInit == FALSE) && (TriggerMarker.IsEnabled())
         StartingPainting = GetLinkedRef()
-        Trace("The Starting Weapon is " + StartingPainting)
+        Log("The Starting painting is " + StartingPainting)
         
         if (StartingPainting)
             if StartingPainting.Is3DLoaded()
                 if StartingPainting.GetParentCell() == self.GetParentCell()
-                    Trace("Has a starting painting")
+                    Log("Has a starting painting")
                     HandleStartingPainting()
                 endif
             endif
         else
-            Trace("Doesn't have a starting painting")
+            Log("Doesn't have a starting painting")
             ;Do nothing
         endif
 
@@ -53,7 +53,7 @@ EVENT OnCellAttach()
 
     TriggerMarker = NONE
 
-    Trace("finishing OnCellLoad() and AlreadyInit = " + AlreadyInit)
+    Log("finishing OnCellLoad() and AlreadyInit = " + AlreadyInit)
 endEVENT
 
     
@@ -61,7 +61,7 @@ Auto STATE EmptyRack
     EVENT onActivate(ObjectReference TriggerRef)
         if (TriggerRef == Game.GetPlayer() as Actor)
         ; Only the player can activate this
-            Trace("Player activated the weapon rack")
+            Log("Player activated the painting hook")
 
             QuestScript.Start()
             utility.wait(1)  ; give some time to the quest to start
@@ -69,7 +69,7 @@ Auto STATE EmptyRack
             ReferenceAlias PaintingAlias = QuestScript.Painting
             Painting = PaintingAlias.GetRef()
             Log(Painting)
-            If (Painting)
+            If (Painting && Painting.GetParentCell() == self.GetParentCell())
                 Log("Painting.IsLocked => " + Painting.IsLocked())
                 Log("Painting.GetDistance => " + Painting.GetDistance(PlayerRef))
                 HandleWeaponPlacement()
@@ -97,7 +97,7 @@ Function HandleWeaponPlacement(bool ForStartingPainting = FALSE)
 
     Painting.SetMotionType(Motion_Keyframed, false)
     ; Tell the weapon to ignore all forms of physic interaction
-    Trace("Disabling physics on " + Painting)
+    Log("Disabling physics on " + Painting)
     
     TriggerMarker = GetLinkedRef(WRackTrigger)
 
@@ -120,5 +120,5 @@ Function HandleStartingPainting()
 EndFunction
 
 Function Log(String msg, String modname="DSC04")
-    Debug.Trace("[" + modname + "] " + self + " " + msg)
+    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction
