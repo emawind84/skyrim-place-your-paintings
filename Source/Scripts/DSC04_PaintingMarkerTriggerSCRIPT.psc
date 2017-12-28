@@ -31,61 +31,47 @@ EVENT OnReset()
 endEVENT
 
 EVENT OnUpdate()
-    Log("OnUpdate - GetTriggerObjectCount => " + GetTriggerObjectCount())
+    ;Log("OnUpdate - GetTriggerObjectCount => " + GetTriggerObjectCount())
     if self.IsEnabled() && GetTriggerObjectCount() == 0
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
+            ;Log("Enabling activator")
             ActivatorRef.Enable()
         endif
     else
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
+            ;Log("Disabling activator")
             ActivatorRef.Disable()
         endif
     endif
     ActivatorRef = NONE
 
     if PlayerRef.IsInLocation(self.GetCurrentLocation())
+    ; since ontriggerleave doesn't get fired most of the times
+    ; we force an update so we check again if the activator have to be enabled or disabled
         RegisterForSingleUpdate(2)
     endif
 endEVENT
 
-EVENT OnCellAttach()
+EVENT OnCellLoad()
     Log("running OnCellAttach() and AlreadyInit = " + AlreadyInit)
-    EnableParentRef = GetLinkedRef(DSC04EnableParent)
-    DisableParentRef = GetLinkedRef(DSC04DisableParent)
-    Log("EnableParentRef => " + EnableParentRef)
-    Log("DisableParentRef => " + DisableParentRef)
-    if EnableParentRef
-        if EnableParentRef.IsEnabled()
-            if DisableParentRef
-                if DisableParentRef.IsDisabled()
-                    self.Enable()
-                else
-                    self.Disable()
-                endif
-            else
-                self.Enable()
-            endif
-        else
-            self.Disable()
-        endif
-    endif
+    ToggleMarker()
 
     if (AlreadyInit == FALSE) && (self.IsEnabled())
         ActivatorRef = GetLinkedRef(WRackActivator)
         if (ActivatorRef)
             Log("The Activator Ref is " + ActivatorRef)
             ActivatorRef.Enable()
+            ; required since the oncellattach event in the activator might get fired 
+            ; when this ref is still disabled, and the starting painting/item is not handled
+            ;ActivatorRef.RegisterForSingleUpdate(2)
         endif
         ActivatorRef = NONE
         AlreadyInit = TRUE
     else
         ;Do nothing
     endif
-
-    EnableParentRef = NONE
-    DisableParentRef = NONE
 
     Log("finishing OnLoad() and AlreadyInit = " + AlreadyInit)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
@@ -122,6 +108,37 @@ auto STATE WaitingForReference
     endEVENT
 endSTATE
 
+Function ToggleMarker()
+    EnableParentRef = GetLinkedRef(DSC04EnableParent)
+    DisableParentRef = GetLinkedRef(DSC04DisableParent)
+    Log("EnableParentRef => " + EnableParentRef)
+    Log("DisableParentRef => " + DisableParentRef)
+
+    bool bEnable = TRUE
+    if EnableParentRef
+        if EnableParentRef.IsDisabled()
+            bEnable = FALSE
+        endif
+    endif
+
+    if DisableParentRef
+        if DisableParentRef.IsEnabled()
+            bEnable = FALSE
+        endif
+    endif
+
+    if bEnable
+        self.Enable()
+    else
+        self.Disable()
+    endif
+
+    Log("Marker enabled => " + self.IsEnabled())
+
+    EnableParentRef = NONE
+    DisableParentRef = NONE
+EndFunction
+
 Function Log(String msg, String modname="DSC04")
-    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
+    Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction

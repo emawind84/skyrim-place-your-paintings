@@ -22,8 +22,7 @@ Actor Property PlayerRef Auto
 Message Property DSC04_NoPaintingToPlace Auto;
 
 ;-------------------------------------------
-EVENT OnCellAttach()
-    Log("running OnCellLoad() and AlreadyInit = " + AlreadyInit)
+Event OnUpdate()
     TriggerMarker = GetLinkedRef(WRackTrigger)
     Log("The TriggerMarker is " + TriggerMarker)
     If (TriggerMarker) && (TriggerMarker.IsEnabled()) && (TriggerMarker.GetTriggerObjectCount() == 0)
@@ -52,11 +51,14 @@ EVENT OnCellAttach()
     endif
 
     TriggerMarker = NONE
+EndEvent
 
+EVENT OnCellLoad()
+    Log("running OnCellLoad() and AlreadyInit = " + AlreadyInit)
+    RegisterForSingleUpdate(0)
     Log("finishing OnCellLoad() and AlreadyInit = " + AlreadyInit)
 endEVENT
 
-    
 Auto STATE EmptyRack
     EVENT onActivate(ObjectReference TriggerRef)
         if (TriggerRef == Game.GetPlayer() as Actor)
@@ -120,5 +122,5 @@ Function HandleStartingPainting()
 EndFunction
 
 Function Log(String msg, String modname="DSC04")
-    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
+    Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction
