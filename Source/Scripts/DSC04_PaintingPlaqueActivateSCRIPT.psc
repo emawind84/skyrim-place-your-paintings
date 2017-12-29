@@ -13,6 +13,8 @@ Keyword Property WRackTrigger Auto
 
 Keyword Property DSC04HookableDefault Auto
 
+Keyword Property DSC04HookableDefault02 Auto
+
 Keyword Property DSC04HookablePainting Auto
 
 Keyword Property DSC04HookablePlate Auto
@@ -110,6 +112,8 @@ Function HandleWeaponPlacement(bool ForStartingPainting = FALSE)
         Painting.MoveToNode(TriggerMarker, "PlatePivot01")
     elseif DSC04PaintingList01.HasForm(Painting.GetBaseObject()) || Painting.HasKeyword(DSC04HookablePainting)
         Painting.MoveToNode(TriggerMarker, "PaintingPivot01")
+    elseif Painting.HasKeyword(DSC04HookableDefault02)
+        Painting.MoveToNode(TriggerMarker, "DefaultPivot02")
     else
         Painting.MoveToNode(TriggerMarker, "DefaultPivot01")
     endif
@@ -148,5 +152,5 @@ bool Function SetReferenceMotionType(ObjectReference refObj, int iMotionType)
 EndFunction
 
 Function Log(String msg, String modname="DSC04")
-    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
+    Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction

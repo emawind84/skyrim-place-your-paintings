@@ -142,5 +142,5 @@ bool Function IsHookable(ObjectReference refObj)
 EndFunction
 
 Function Log(String msg, String modname="DSC04")
-    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
+    Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction
