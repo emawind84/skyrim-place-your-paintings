@@ -9,7 +9,7 @@ xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
                     <plugins order="Explicit">
                         <plugin name="Core Files">
                             <description>
-                                <![CDATA[Core module mandatory.]]>
+                                <![CDATA[Core module mandatory, add scripts, trigger, activator and other stuff to make work the hook.]]>
                             </description>
                             <files>
                                 <folder source="00 Core" destination="" priority="0"/>
