@@ -1,0 +1,83 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+    <moduleName>DSC's Hook Your Stuff</moduleName>
+    <moduleImage path="FOMod\header.jpg"/>
+    <installSteps order="Explicit">
+        <installStep name="Base Options">
+            <optionalFileGroups>
+                <group name="Main Options" type="SelectExactlyOne">
+                    <plugins order="Explicit">
+                        <plugin name="Core Files">
+                            <description>
+                                <![CDATA[Core module mandatory.]]>
+                            </description>
+                            <files>
+                                <folder source="00 Core" destination="" priority="0"/>
+                            </files>
+                            <typeDescriptor>
+                                <type name="Required"/>
+                            </typeDescriptor>
+                        </plugin>
+                    </plugins>
+                </group>
+                <group name="Options" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Vanilla Houses">
+<description>
+<![CDATA[Add hooks to some of the vanilla houses.
+Without other optional files only a few objects can be hooked, like plates and bowl, more to come with future updates.]]>
+</description>
+                            <!-- <image path="FOMod\Optional.png"/> -->
+                            <files>
+                                <folder source="01 VanillaHouses" destination="" priority="0"/>
+                            </files>
+                            <conditionFlags>
+                                <flag name="vanillahouses">On</flag>
+                            </conditionFlags>
+                            <typeDescriptor>
+                                <type name="Recommended"/>
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="Narrative Loot Paintings">
+<description>
+<![CDATA[Only if you are using Narrative Loot.
+You can hook paintings that you find in Skyrim.
+The first option, Vanilla Houses, should be selected aswell.]]>
+</description>
+                            <!-- <image path="FOMod\Optional.png"/> -->
+                            <files>
+                                <folder source="02 NarrativeLootPaintings" destination="" priority="0"/>
+                            </files>
+                            <typeDescriptor>
+                                <dependencyType>
+                                    <defaultType name="Optional"/>
+                                    <patterns>
+                                        <pattern>
+                                            <dependencies>
+                                                <fileDependency file="NarrativeLoot Complete.esp" state="Active"/>
+                                            </dependencies>
+                                            <type name="Optional"/>
+                                        </pattern>
+                                        <pattern>
+                                            <dependencies operator="Or">
+                                                <fileDependency file="NarrativeLoot Complete.esp" state="Inactive"/>
+                                                <fileDependency file="NarrativeLoot Complete.esp" state="Missing"/>
+                                            </dependencies>
+                                            <type name="NotUsable"/>
+                                        </pattern>
+                                        <pattern>
+                                            <dependencies>
+                                                <flagDependency flag="vanillahouses" value="" />
+                                            </dependencies>
+                                            <type name="CouldBeUsable"/>
+                                        </pattern>
+                                    </patterns>
+                                </dependencyType>
+                            </typeDescriptor>
+                        </plugin> 
+                    </plugins>
+                </group> 
+            </optionalFileGroups>
+        </installStep>
+    </installSteps>
+</config>
