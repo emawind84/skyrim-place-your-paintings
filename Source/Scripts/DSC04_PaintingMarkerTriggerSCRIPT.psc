@@ -48,7 +48,7 @@ EVENT OnUpdate()
 
             ; required since the oncellattach event in the activator might get fired 
             ; when this ref is still disabled, and the starting painting/item is not handled
-            ActivatorRef.RegisterForSingleUpdate(2)
+            ActivatorRef.RegisterForSingleUpdate(0)
         endif
     else
         ActivatorRef = GetLinkedRef(WRackActivator)

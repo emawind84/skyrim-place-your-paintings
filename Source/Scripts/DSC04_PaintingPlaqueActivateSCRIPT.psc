@@ -15,6 +15,8 @@ Keyword Property DSC04HookableDefault Auto
 
 Keyword Property DSC04HookableDefault02 Auto
 
+Keyword Property DSC04HookableDefault03 Auto
+
 Keyword Property DSC04HookablePainting Auto
 
 Keyword Property DSC04HookablePlate Auto
@@ -78,7 +80,7 @@ Auto STATE EmptyRack
             Log("Player activated the object hook")
 
             QuestScript.Start()
-            utility.wait(1)  ; give some time to the quest to start
+            utility.wait(0.2)  ; give some time to the quest to start
 
             ReferenceAlias PaintingAlias = QuestScript.Painting
             Painting = PaintingAlias.GetRef()
@@ -114,6 +116,8 @@ Function HandleWeaponPlacement(bool ForStartingPainting = FALSE)
         Painting.MoveToNode(TriggerMarker, "PaintingPivot01")
     elseif Painting.HasKeyword(DSC04HookableDefault02)
         Painting.MoveToNode(TriggerMarker, "DefaultPivot02")
+    elseif Painting.HasKeyword(DSC04HookableDefault03)
+        Painting.MoveToNode(TriggerMarker, "DefaultPivot03")
     else
         Painting.MoveToNode(TriggerMarker, "DefaultPivot01")
     endif
