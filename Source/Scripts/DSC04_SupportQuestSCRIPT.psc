@@ -1,8 +1,14 @@
 Scriptname DSC04_SupportQuestSCRIPT extends Quest  
 
 String Version
+
 String Property ModName = "DSC" Auto
+
 String Property FullModName = "Disco Mod" Auto
+
+Spell Property DSC04ShowHookMarkerSpell Auto
+
+Actor Property PlayerREF Auto
 
 Event OnInit()
     Maintenance() ; OnPlayerLoadGame will not fire the first time
@@ -21,6 +27,7 @@ Function Maintenance()
         ; Update Code
     EndIf
     ; Other maintenance code that only needs to run once per save load
+    PlayerREF.AddSpell(DSC04ShowHookMarkerSpell)
 EndFunction
 
 Function Log(String msg, String modname="")
