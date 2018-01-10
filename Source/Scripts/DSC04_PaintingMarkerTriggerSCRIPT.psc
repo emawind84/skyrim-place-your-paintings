@@ -16,6 +16,16 @@ Keyword Property DSC04DisableParent Auto
 
 Keyword Property DSC04EnableParent Auto
 
+Keyword Property DSC04HookableDefault Auto
+
+Keyword Property DSC04HookableDefault02 Auto
+
+Keyword Property DSC04HookableDefault03 Auto
+
+Keyword Property DSC04HookablePainting Auto
+
+Keyword Property DSC04HookablePlate Auto
+
 ;The activator we must disable if there is already something in this trigger
 ObjectReference Property ActivatorRef Auto Hidden
 
@@ -29,7 +39,7 @@ Actor Property PlayerRef Auto
 
 Keyword Property DSC04Hookable Auto
 
-Int InTrigger = 0
+ObjectReference InTrigger
 
 EVENT OnReset()
     AlreadyInit = FALSE
@@ -68,35 +78,41 @@ endEVENT
 
 EVENT OnCellAttach()
     Log("running OnCellAttach() and AlreadyInit = " + AlreadyInit)
+    Reset()  ; reset the position of the marker
     RegisterForSingleUpdate(2)
+    
+    if InTrigger
+        Log("replacing current object => " + InTrigger)
+        HandleObjectPlacement(InTrigger)
+    endif
 endEVENT
 
-EVENT OnTriggerEnter(objectReference triggerRef)
+EVENT OnTriggerEnter(objectReference akTriggerRef)
     ;debug.MessageBox("OnTriggerEnter " + triggerRef)
-    Log("OnTriggerEnter " + triggerRef)
+    Log("OnTriggerEnter " + akTriggerRef)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
-    if IsHookable(triggerRef)
+    if IsHookable(akTriggerRef)
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
             ActivatorRef.Disable()
         endif
         ActivatorRef = NONE
-        triggerRef.Lock(TRUE)
+        akTriggerRef.Lock(TRUE)
     endif
     
 endEVENT
 
-EVENT OnTriggerLeave(objectReference triggerRef)
-    ;debug.MessageBox("OnTriggerLeave " + triggerRef)
-    Log("OnTriggerLeave " + triggerRef)
+EVENT OnTriggerLeave(objectReference akTriggerRef)
+    ;debug.MessageBox("OnTriggerLeave " + akTriggerRef)
+    Log("OnTriggerLeave " + akTriggerRef)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
-    if IsHookable(triggerRef)
+    if IsHookable(akTriggerRef)
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
             ActivatorRef.Enable()
         endif
         ActivatorRef = NONE
-        triggerRef.Lock(FALSE)
+        akTriggerRef.Lock(FALSE)
     endif
 endEVENT
 
@@ -131,16 +147,64 @@ Function ToggleMarker()
     DisableParentRef = NONE
 EndFunction
 
-bool Function IsHookable(ObjectReference refObj)
+bool Function IsHookable(ObjectReference akObjRef)
     bool hookable = FALSE
-    hookable = hookable || DSC04PaintingList01.HasForm(refObj.GetBaseObject())
-    hookable = hookable || DSC04PlateList01.HasForm(refObj.GetBaseObject())
-    hookable = hookable || DSC04DefaultHookableList01.HasForm(refObj.GetBaseObject())
-    hookable = hookable || refObj.HasKeyword(DSC04Hookable)
-    Log("IsHookable " + refObj + " => " + hookable)
+    hookable = hookable || DSC04PaintingList01.HasForm(akObjRef.GetBaseObject())
+    hookable = hookable || DSC04PlateList01.HasForm(akObjRef.GetBaseObject())
+    hookable = hookable || DSC04DefaultHookableList01.HasForm(akObjRef.GetBaseObject())
+    hookable = hookable || akObjRef.HasKeyword(DSC04Hookable)
+    Log("IsHookable " + akObjRef + " => " + hookable)
     return hookable
 EndFunction
 
+Function HandleObjectPlacement(ObjectReference akObjRef)
+    if !SetReferenceMotionType(akObjRef, Motion_Keyframed)
+        Log("MotionType cannot be set, returning...")
+        return
+    endif
+    
+    ObjectReference TriggerMarker = self
+    ;akObjRef.TranslateToRef(TriggerMarker, 1000.0)
+    ;akObjRef.SplineTranslateToRefNode(TriggerMarker, "ShieldPivot01", 1.0, 1000.0)
+    if DSC04PlateList01.HasForm(akObjRef.GetBaseObject()) || akObjRef.HasKeyword(DSC04HookablePlate)
+        akObjRef.MoveToNode(TriggerMarker, "PlatePivot01")
+    elseif DSC04PaintingList01.HasForm(akObjRef.GetBaseObject()) || akObjRef.HasKeyword(DSC04HookablePainting)
+        akObjRef.MoveToNode(TriggerMarker, "PaintingPivot01")
+    elseif akObjRef.HasKeyword(DSC04HookableDefault02)
+        akObjRef.MoveToNode(TriggerMarker, "DefaultPivot02")
+    elseif akObjRef.HasKeyword(DSC04HookableDefault03)
+        akObjRef.MoveToNode(TriggerMarker, "DefaultPivot03")
+    else
+        akObjRef.MoveToNode(TriggerMarker, "DefaultPivot01")
+    endif
+    ;akObjRef.SetAngle(TriggerMarker.GetAngleX(), TriggerMarker.GetAngleY(), TriggerMarker.GetAngleZ())
+    ;SetReferenceMotionType(akObjRef, Motion_Keyframed)
+    ;Log("TriggerMarker.GetTriggerObjectCount() " + TriggerMarker.GetTriggerObjectCount())
+    ;If (TriggerMarker.GetTriggerObjectCount() > 0)
+    ;    self.Disable()
+    ;endif
+    
+    InTrigger = akObjRef
+EndFunction
+
+bool Function SetReferenceMotionType(ObjectReference akObjRef, int iMotionType)
+    int Count = 0
+    While(!akObjRef.Is3DLoaded()) && (Count < 10)
+        ; Have to wait to make sure the item is dropped before setting it's motion type, or else I get a "Object has no 3D" error.
+        Utility.Wait(0.1)
+        Count += 1
+    EndWhile
+
+    if akObjRef.Is3DLoaded()
+        akObjRef.SetMotionType(iMotionType, false)
+        ; Tell the obj ref to ignore all forms of physic interaction
+        Log("Disabling physics on " + akObjRef)
+    else
+        return FALSE
+    endif
+    return TRUE
+EndFunction
+
 Function Log(String msg, String modname="DSC04")
-    Debug.Trace("[" + modname + "] " + self + " " + msg)
+    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction

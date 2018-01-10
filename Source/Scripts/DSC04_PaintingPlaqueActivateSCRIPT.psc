@@ -11,25 +11,11 @@ Bool Property AlreadyInit Auto Hidden
 
 Keyword Property WRackTrigger Auto
 
-Keyword Property DSC04HookableDefault Auto
-
-Keyword Property DSC04HookableDefault02 Auto
-
-Keyword Property DSC04HookableDefault03 Auto
-
-Keyword Property DSC04HookablePainting Auto
-
-Keyword Property DSC04HookablePlate Auto
-
 ObjectReference Property TriggerMarker Auto Hidden
 
 ObjectReference Property StartingPainting Auto Hidden
 
 ObjectReference Property Painting Auto Hidden
-
-FormList Property DSC04PlateList01 Auto
-
-FormList Property DSC04PaintingList01 Auto
 
 Actor Property PlayerRef Auto
 
@@ -101,32 +87,12 @@ Auto STATE EmptyRack
     endEVENT
 endSTATE
 
-Function HandleWeaponPlacement(bool ForStartingPainting = FALSE)
-    if !SetReferenceMotionType(Painting, Motion_Keyframed)
-        Log("MotionType cannot be set, returning...")
-        return
-    endif
-    
+Function HandleWeaponPlacement(bool bForStartingPainting = FALSE)
     TriggerMarker = GetLinkedRef(WRackTrigger)
-    ;Painting.TranslateToRef(TriggerMarker, 1000.0)
-    ;Painting.SplineTranslateToRefNode(TriggerMarker, "ShieldPivot01", 1.0, 1000.0)
-    if DSC04PlateList01.HasForm(Painting.GetBaseObject()) || Painting.HasKeyword(DSC04HookablePlate)
-        Painting.MoveToNode(TriggerMarker, "PlatePivot01")
-    elseif DSC04PaintingList01.HasForm(Painting.GetBaseObject()) || Painting.HasKeyword(DSC04HookablePainting)
-        Painting.MoveToNode(TriggerMarker, "PaintingPivot01")
-    elseif Painting.HasKeyword(DSC04HookableDefault02)
-        Painting.MoveToNode(TriggerMarker, "DefaultPivot02")
-    elseif Painting.HasKeyword(DSC04HookableDefault03)
-        Painting.MoveToNode(TriggerMarker, "DefaultPivot03")
-    else
-        Painting.MoveToNode(TriggerMarker, "DefaultPivot01")
+    
+    if TriggerMarker as DSC04_PaintingMarkerTriggerSCRIPT
+        (TriggerMarker as DSC04_PaintingMarkerTriggerSCRIPT).HandleObjectPlacement(Painting)
     endif
-    ;Painting.SetAngle(TriggerMarker.GetAngleX(), TriggerMarker.GetAngleY(), TriggerMarker.GetAngleZ())
-    ;SetReferenceMotionType(Painting, Motion_Keyframed)
-    ;Log("TriggerMarker.GetTriggerObjectCount() " + TriggerMarker.GetTriggerObjectCount())
-    ;If (TriggerMarker.GetTriggerObjectCount() > 0)
-    ;    self.Disable()
-    ;endif
     
     TriggerMarker = NONE
 
@@ -137,24 +103,6 @@ Function HandleStartingPainting()
     HandleWeaponPlacement(TRUE)
 EndFunction
 
-bool Function SetReferenceMotionType(ObjectReference refObj, int iMotionType)
-    int Count = 0
-    While(!refObj.Is3DLoaded()) && (Count < 10)
-        ; Have to wait to make sure the item is dropped before setting it's motion type, or else I get a "Object has no 3D" error.
-        Utility.Wait(0.1)
-        Count += 1
-    EndWhile
-
-    if refObj.Is3DLoaded()
-        refObj.SetMotionType(iMotionType, false)
-        ; Tell the obj ref to ignore all forms of physic interaction
-        Log("Disabling physics on " + refObj)
-    else
-        return FALSE
-    endif
-    return TRUE
-EndFunction
-
 Function Log(String msg, String modname="DSC04")
-    Debug.Trace("[" + modname + "] " + self + " " + msg)
+    ;Debug.Trace("[" + modname + "] " + self + " " + msg)
 EndFunction
