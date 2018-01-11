@@ -39,7 +39,7 @@ Actor Property PlayerRef Auto
 
 Keyword Property DSC04Hookable Auto
 
-ObjectReference InTrigger
+ObjectReference CurrentObjectRef
 
 EVENT OnReset()
     AlreadyInit = FALSE
@@ -81,9 +81,9 @@ EVENT OnCellAttach()
     Reset()  ; reset the position of the marker
     RegisterForSingleUpdate(2)
     
-    if InTrigger
-        Log("replacing current object => " + InTrigger)
-        HandleObjectPlacement(InTrigger)
+    if CurrentObjectRef
+        Log("replacing current object => " + CurrentObjectRef)
+        HandleObjectPlacement(CurrentObjectRef)
     endif
 endEVENT
 
@@ -92,6 +92,10 @@ EVENT OnTriggerEnter(objectReference akTriggerRef)
     Log("OnTriggerEnter " + akTriggerRef)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
     if IsHookable(akTriggerRef)
+        
+        ; we save the object so it can be placed again on cell load
+        CurrentObjectRef = akTriggerRef
+
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
             ActivatorRef.Disable()
@@ -107,6 +111,11 @@ EVENT OnTriggerLeave(objectReference akTriggerRef)
     Log("OnTriggerLeave " + akTriggerRef)
     Log("GetTriggerObjectCount => " + GetTriggerObjectCount())
     if IsHookable(akTriggerRef)
+
+        if CurrentObjectRef == akTriggerRef
+            CurrentObjectRef = NONE
+        endif
+
         ActivatorRef = GetLinkedRef(WRackActivator)
         if ActivatorRef
             ActivatorRef.Enable()
@@ -183,8 +192,6 @@ Function HandleObjectPlacement(ObjectReference akObjRef)
     ;If (TriggerMarker.GetTriggerObjectCount() > 0)
     ;    self.Disable()
     ;endif
-    
-    InTrigger = akObjRef
 EndFunction
 
 bool Function SetReferenceMotionType(ObjectReference akObjRef, int iMotionType)
