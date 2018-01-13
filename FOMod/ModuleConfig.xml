@@ -56,7 +56,7 @@ The first option, Vanilla Houses, should be selected aswell.]]>
                                             <dependencies>
                                                 <fileDependency file="NarrativeLoot Complete.esp" state="Active"/>
                                             </dependencies>
-                                            <type name="Optional"/>
+                                            <type name="Recommended"/>
                                         </pattern>
                                         <pattern>
                                             <dependencies operator="Or">
